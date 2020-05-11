@@ -30,7 +30,8 @@ import java.util.regex.Pattern;
  * @author Nilhcem
  * @since 1.0
  */
-public final class MailSaver extends Observable {
+public final class MailSaver extends Observable implements MailProcessor
+{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MailSaver.class);
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -47,7 +48,8 @@ public final class MailSaver extends Observable {
 	 * @param data an InputStream object containing the email.
 	 * @see com.nilhcem.fakesmtp.gui.MainPanel#addObservers to see which observers will be notified
 	 */
-	public void saveEmailAndNotify(String from, String to, InputStream data) {
+	@Override
+	public void processEmailAndNotify(String from, String to, InputStream data) {
 		List<String> relayDomains = UIModel.INSTANCE.getRelayDomains();
 
 		if (relayDomains != null) {
@@ -87,6 +89,7 @@ public final class MailSaver extends Observable {
 	/**
 	 * Deletes all received emails from file system.
 	 */
+	@Override
 	public void deleteEmails() {
 		Map<Integer, String> mails = UIModel.INSTANCE.getListMailsMap();
 		if (ArgsHandler.INSTANCE.memoryModeEnabled()) {

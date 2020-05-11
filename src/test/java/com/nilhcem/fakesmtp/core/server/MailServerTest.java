@@ -62,7 +62,7 @@ public class MailServerTest {
 		};
 		saver.addObserver(mockObserver);
 		assertTrue(saver.countObservers() != 0);
-		saver.saveEmailAndNotify(from, to, data);
+		saver.processEmailAndNotify(from, to, data);
 		saver.deleteObserver(mockObserver);
 	}
 

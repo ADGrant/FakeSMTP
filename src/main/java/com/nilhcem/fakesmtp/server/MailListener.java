@@ -11,14 +11,14 @@ import org.subethamail.smtp.helper.SimpleMessageListener;
  * @since 1.0
  */
 public final class MailListener implements SimpleMessageListener {
-	private final MailSaver saver;
+	private final MailProcessor saver;
 
 	/**
 	 * Creates the listener.
 	 *
 	 * @param saver a {@code MailServer} object used to save emails and notify components.
 	 */
-	public MailListener(MailSaver saver) {
+	public MailListener(MailProcessor saver) {
 		this.saver = saver;
 	}
 
@@ -42,6 +42,6 @@ public final class MailListener implements SimpleMessageListener {
      */
 	@Override
 	public void deliver(String from, String recipient, InputStream data) throws IOException {
-		saver.saveEmailAndNotify(from, recipient, data);
+		saver.processEmailAndNotify(from, recipient, data);
 	}
 }

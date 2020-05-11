@@ -3,7 +3,6 @@ package com.nilhcem.fakesmtp.headless;
 import com.nilhcem.fakesmtp.core.exception.BindPortException;
 import com.nilhcem.fakesmtp.core.exception.OutOfRangePortException;
 import com.nilhcem.fakesmtp.server.MailListener;
-import com.nilhcem.fakesmtp.server.MailSaver;
 import com.nilhcem.fakesmtp.server.SMTPAuthHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +14,8 @@ import java.net.InetAddress;
 public class HeadlessSMTPServerHandler
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessSMTPServerHandler.class);
-    private final MailSaver mailSaver = new MailSaver();
-    private final MailListener myListener = new MailListener(mailSaver);
+    private final MailPublisher mailPublisher = new MailPublisher();
+    private final MailListener myListener = new MailListener(mailPublisher);
     private final SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(myListener), new SMTPAuthHandlerFactory());
 
     HeadlessSMTPServerHandler() {
@@ -69,8 +68,8 @@ public class HeadlessSMTPServerHandler
      *
      * @return the {@code MailSaver} object.
      */
-    public MailSaver getMailSaver() {
-        return mailSaver;
+    public MailPublisher getMailPublisher() {
+        return mailPublisher;
     }
 
     /**
