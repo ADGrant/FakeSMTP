@@ -41,7 +41,7 @@ public class MailPublisher extends Observable implements MailProcessor
             email.setFrom(from);
             email.addTo(to);
             email.setSubject(getSubjectFromStr(mailContent));
-            email.setMsg(mailContent);
+            email.setMsg(getBodyFromStr(mailContent));
             email.send();
         }
         catch (EmailException e)
@@ -57,19 +57,6 @@ public class MailPublisher extends Observable implements MailProcessor
      */
     public void deleteEmails() {
 
-    }
-
-    /**
-     * Returns a lock object.
-     * <p>
-     * This lock will be used to make the application thread-safe, and
-     * avoid receiving and deleting emails in the same time.
-     * </p>
-     *
-     * @return a lock object <i>(which is actually the current instance of the {@code MailSaver} object)</i>.
-     */
-    public Object getLock() {
-        return this;
     }
 
     /**
@@ -124,5 +111,24 @@ public class MailPublisher extends Observable implements MailProcessor
             LOGGER.error("", e);
         }
         return "";
+    }
+
+    private String getBodyFromStr(String mailContent)
+    {
+        var lines = mailContent.split("\n");
+        int lineIdx = 0;
+        for (; lineIdx < lines.length; lineIdx++) {
+            if (lines[lineIdx].startsWith("Content-Transfer-Encoding:"))
+            {
+                break;
+            }
+        }
+        lineIdx++;
+        var buffer = new StringBuffer();
+        for (; lineIdx < lines.length; lineIdx++)
+        {
+            buffer.append(lines[lineIdx]).append("\n");
+        }
+        return buffer.toString();
     }
 }
