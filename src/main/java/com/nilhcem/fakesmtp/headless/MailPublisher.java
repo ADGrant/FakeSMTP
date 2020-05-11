@@ -1,24 +1,18 @@
 package com.nilhcem.fakesmtp.headless;
 
-import com.nilhcem.fakesmtp.core.ArgsHandler;
-import com.nilhcem.fakesmtp.core.Configuration;
 import com.nilhcem.fakesmtp.core.I18n;
 import com.nilhcem.fakesmtp.model.EmailModel;
-import com.nilhcem.fakesmtp.model.UIModel;
 import com.nilhcem.fakesmtp.server.MailProcessor;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.mail.*;
 
 public class MailPublisher extends Observable implements MailProcessor
 {
@@ -37,62 +31,31 @@ public class MailPublisher extends Observable implements MailProcessor
      * @param data an InputStream object containing the email.
      */
     public void processEmailAndNotify(String from, String to, InputStream data) {
-        List<String> relayDomains = UIModel.INSTANCE.getRelayDomains();
-
-        if (relayDomains != null) {
-            boolean matches = false;
-            for (String domain : relayDomains) {
-                if (to.endsWith(domain)) {
-                    matches = true;
-                    break;
-                }
-            }
-
-            if (!matches) {
-                LOGGER.debug("Destination {} doesn't match relay domains", to);
-                return;
-            }
+        try
+        {
+            String mailContent = convertStreamToString(data);
+            Email email = new SimpleEmail();
+            email.setHostName("localhost");
+            email.setSmtpPort(2550);
+            email.setStartTLSEnabled(true);
+            email.setFrom(from);
+            email.setSubject(getSubjectFromStr(mailContent));
+            email.setMsg(mailContent);
+            email.send();
+        }
+        catch (EmailException e)
+        {
+            e.printStackTrace();
         }
 
-        // We move everything that we can move outside the synchronized block to limit the impact
-        EmailModel model = new EmailModel();
-        model.setFrom(from);
-        model.setTo(to);
-        String mailContent = convertStreamToString(data);
-        model.setSubject(getSubjectFromStr(mailContent));
-        model.setEmailStr(mailContent);
 
-        synchronized (getLock()) {
-            String filePath = saveEmailToFile(mailContent);
-
-            model.setReceivedDate(new Date());
-            model.setFilePath(filePath);
-
-            setChanged();
-            notifyObservers(model);
-        }
     }
 
     /**
      * Deletes all received emails from file system.
      */
     public void deleteEmails() {
-        Map<Integer, String> mails = UIModel.INSTANCE.getListMailsMap();
-        if (ArgsHandler.INSTANCE.memoryModeEnabled()) {
-            return;
-        }
-        for (String value : mails.values()) {
-            File file = new File(value);
-            if (file.exists()) {
-                try {
-                    if (!file.delete()) {
-                        LOGGER.error("Impossible to delete file {}", value);
-                    }
-                } catch (SecurityException e) {
-                    LOGGER.error("", e);
-                }
-            }
-        }
+
     }
 
     /**
@@ -137,42 +100,7 @@ public class MailPublisher extends Observable implements MailProcessor
         return sb.toString();
     }
 
-    /**
-     * Saves the content of the email passed in parameters in a file.
-     *
-     * @param mailContent the content of the email to be saved.
-     * @return the path of the created file.
-     */
-    private String saveEmailToFile(String mailContent) {
-        if (ArgsHandler.INSTANCE.memoryModeEnabled()) {
-            return null;
-        }
-        String filePath = String.format("%s%s%s", UIModel.INSTANCE.getSavePath(), File.separator,
-                dateFormat.format(new Date()));
 
-        // Create file
-        int i = 0;
-        File file = null;
-        while (file == null || file.exists()) {
-            String iStr;
-            if (i++ > 0) {
-                iStr = Integer.toString(i);
-            } else {
-                iStr = "";
-            }
-            file = new File(filePath + iStr + Configuration.INSTANCE.get("emails.suffix"));
-        }
-
-        // Copy String to file
-        try {
-            FileUtils.writeStringToFile(file, mailContent);
-        } catch (IOException e) {
-            // If we can't save file, we display the error in the SMTP logs
-            Logger smtpLogger = LoggerFactory.getLogger(org.subethamail.smtp.server.Session.class);
-            smtpLogger.error("Error: Can't save email: {}", e.getMessage());
-        }
-        return file.getAbsolutePath();
-    }
 
     /**
      * Gets the subject from the email data passed in parameters.
