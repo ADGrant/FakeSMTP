@@ -39,6 +39,7 @@ public class MailPublisher extends Observable implements MailProcessor
             email.setSmtpPort(2550);
             email.setStartTLSEnabled(true);
             email.setFrom(from);
+            email.addTo(to);
             email.setSubject(getSubjectFromStr(mailContent));
             email.setMsg(mailContent);
             email.send();
