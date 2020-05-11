@@ -2,7 +2,6 @@ package com.nilhcem.fakesmtp.headless;
 
 import com.nilhcem.fakesmtp.core.ArgsHandler;
 import com.nilhcem.fakesmtp.core.Configuration;
-import com.nilhcem.fakesmtp.core.exception.UncaughtExceptionHandler;
 import com.nilhcem.fakesmtp.server.SMTPServerHandler;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
@@ -28,7 +27,8 @@ public class HeadlessSMTP
         }
         try
         {
-            SMTPServerHandler.INSTANCE.startServer(getPort(), getBindAddress());
+            var handler = new HeadlessSMTPServerHandler();
+            handler.startServer(getPort(), getBindAddress());
         }
         catch (NumberFormatException e)
         {

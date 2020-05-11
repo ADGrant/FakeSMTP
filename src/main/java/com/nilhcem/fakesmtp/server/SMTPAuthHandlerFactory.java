@@ -11,7 +11,7 @@ import org.subethamail.smtp.AuthenticationHandlerFactory;
  * @author jasonpenny
  * @since 1.2
  */
-/*package*/ final class SMTPAuthHandlerFactory implements AuthenticationHandlerFactory {
+/*package*/ public final class SMTPAuthHandlerFactory implements AuthenticationHandlerFactory {
 	private static final String LOGIN_MECHANISM = "LOGIN";
 
 	@Override
