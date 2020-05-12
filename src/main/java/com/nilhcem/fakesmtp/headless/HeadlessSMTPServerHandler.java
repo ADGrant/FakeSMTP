@@ -62,22 +62,4 @@ public class HeadlessSMTPServerHandler
             smtpServer.stop();
         }
     }
-
-    /**
-     * Returns the {@code MailSaver} object.
-     *
-     * @return the {@code MailSaver} object.
-     */
-    public MailPublisher getMailPublisher() {
-        return mailPublisher;
-    }
-
-    /**
-     * Returns the {@code SMTPServer} object.
-     *
-     * @return the {@code SMTPServer} object.
-     */
-    public SMTPServer getSmtpServer() {
-        return smtpServer;
-    }
 }

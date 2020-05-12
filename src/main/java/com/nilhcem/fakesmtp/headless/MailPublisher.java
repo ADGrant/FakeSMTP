@@ -48,8 +48,6 @@ public class MailPublisher extends Observable implements MailProcessor
         {
             e.printStackTrace();
         }
-
-
     }
 
     /**
